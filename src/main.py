@@ -11,20 +11,20 @@ Pytube version: 15.0.0
 '''
 
 #= = = = = = = = = = = = = = = = = = = = = = = = IMPORTAR BIBLIOTECAS = = = = = = = = = = = = = = = = = = = = = = = 
-from tkinter import filedialog
-from tkinter import *
-from pytube import YouTube, streams
 import os
+import winsound
+from tkinter import filedialog, Tk, Label, Entry, Button, PhotoImage, Frame, Toplevel
+from pytube import YouTube
+
 from pytube.contrib.playlist import Playlist
 from pytube.exceptions import RegexMatchError
 from pathlib import Path
-import winsound
 
-# # Para exibir o caminho DA PASTA atual
+# Para exibir o caminho DA PASTA atual
 # caminho_diretorio = Path()             
 # print(caminho_diretorio.absolute()) 
 
-# # Para exibir o caminho DO ARQUIVO atual        
+# Para exibir o caminho DO ARQUIVO atual        
 # caminho_arquivo = Path(__file__)                         
 # print(caminho_arquivo) 
 
@@ -33,7 +33,7 @@ janelaYT = Tk()                 #INICAR A JANELA 'TK INTER'
 janelaYT.geometry('630x230')    #Largura x Altura
 janelaYT.resizable(width=None, height=None) #Largura e Altura PODEM ser redimensionadas.
 janelaYT.title('YT VidSound')
-janelaYT.iconbitmap('images/YT VidSound.ico')
+janelaYT.iconbitmap('images/YT-VidSound.ico')
 janelaYT['bg'] = '#D3D3D3'
 
 #= = = = = = = = = = = = = = = = = = = = = = = = = FUNÇÕES = = = = = = = = = = = = = = = = = = = = = = = =
@@ -120,39 +120,46 @@ def aviso_erro():
     Label(janelaYT_msg, text = 'Insira um link válido!', font = 'arial 12 bold', pady = 30).pack()
     Button(janelaYT_msg, text = 'OK', command = janelaYT_msg.destroy).pack()
 
-########################################## LINHA '0' ########################################## 
-#Config TEXTO: 'INSIRA LINK'
-InsiraLink = Label(janelaYT, bg = 'blue', text = 'Inserir Link', font = 'arial 14 bold')
-InsiraLink.grid(row = 0, column = 0, padx = 5, pady = 20)
+# Frames para organizar os widgets ##################################################### 
+frame_imagem = Frame(janelaYT, bg='#D3D3D3')
+frame_imagem.pack(pady=10)
 
-#Config CAMPO: PARA INSERIR O LINK
-link = Entry(janelaYT, font = 'arial 16 bold', width = 30)
-link.grid(row = 0, column = 1, padx = 1, pady = 20)
+frame_topo = Frame(janelaYT, bg='#D3D3D3')
+frame_topo.pack(pady=10)
 
-#Config Imagem: Arte do YouTube e Python
-photoYTP = PhotoImage(file = "images/YT VidSound.png").subsample(15, 15)
-Label(janelaYT, image = photoYTP).grid(row = 0, column = 2)
+frame_meio = Frame(janelaYT, bg='#D3D3D3')
+frame_meio.pack(pady=10)
 
-########################################## LINHA '1' ##########################################
-#Config Imagem: Download no botao
-photoDW = PhotoImage(file = "images/download_2.png").subsample(15, 15)
+frame_baixo = Frame(janelaYT, bg='#D3D3D3')
+frame_baixo.pack(pady=10)
 
-#Config BOTÃO MÚSICA MP3: PARA INICAR O DOWNLOAD
-bt1 = Button(janelaYT, bg = 'blue', text = ' MÚSICA MP3 ', font = 'arial 12 bold', command = lambda: musica(link.get()), image = photoDW, compound = BOTTOM)
-bt1.grid(row = 1, column = 0, padx = 7, pady = 10)
+# Linha 0 - Entrada do Link e Imagem ###################################################
+photoYTP = PhotoImage(file="images/YT-VidSound.png").subsample(15, 15)
+Label(frame_imagem, image=photoYTP).pack()
 
-#Config BOTÃO VÍDEO MP4: PARA INICAR O DOWNLOAD
-bt2 = Button(janelaYT, bg = 'blue', text = ' VÍDEO MP4 ', font = 'arial 12 bold', command = lambda: video(link.get()), image = photoDW, compound = BOTTOM)
-bt2.grid(row = 1, column = 2, ipadx = 1, ipady = 1, padx = 10, pady = 10)
+# Linha 1 - Entrada do Link e Imagem ###################################################
+Label(frame_topo, bg='blue', text='Inserir Link', font='arial 14 bold').pack(side='left', padx=5)
 
-status = Label(janelaYT, bg = 'red', text = '>      >      >      >      <      <      <      <')
-status.grid(row = 1, column = 1, ipadx=10, ipady=5) 
+link = Entry(frame_topo, font='arial 16 bold', width=30)
+link.pack(side='left', padx=5)
 
-########################################## LINHA '2' ##########################################    
-baixando = Label(janelaYT, bg = 'blue', text = 'STATUS DOWNLOAD', font = 'arial 15 bold')
-baixando.grid(row = 2, column = 1, ipadx = 15, ipady = 5) 
+# Linha 2 - Botões e Status ############################################################
+photoDW = PhotoImage(file="images/download2.png").subsample(15, 15)
 
-janelaYT.mainloop()    #EXIBIR A JANELA ATÉ FECHAR
+bt1 = Button(frame_meio, bg='blue', text='MÚSICA MP3', font='arial 12 bold', command=lambda: musica(link.get()), image=photoDW, compound='bottom')
+bt1.pack(side='left', padx=10)
+
+status = Label(frame_meio, bg='red', text='STATUS DOWNLOAD', font='arial 12 bold')
+status.pack(side='left', padx=10)
+
+bt2 = Button(frame_meio, bg='blue', text='VÍDEO MP4', font='arial 12 bold', command=lambda: video(link.get()), image=photoDW, compound='bottom')
+bt2.pack(side='left', padx=10)
+
+# Linha 3 - Status de Download #########################################################    
+baixando = Label(frame_baixo, bg='blue', text='STATUS DOWNLOAD', font='arial 15 bold')
+baixando.pack(pady=5)
+
+janelaYT.mainloop() #EXIBIR A JANELA ATÉ FECHAR
 
 #LEFT-> a imagem estará no lado esquerdo do botão
 #RIGHT-> a imagem estará no lado direito do botão
