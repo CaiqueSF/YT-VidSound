@@ -15,10 +15,9 @@ import os
 import winsound
 from tkinter import filedialog, Tk, Label, Entry, Button, PhotoImage, Frame, Toplevel
 from pytube import YouTube
-
-from pytube.contrib.playlist import Playlist
-from pytube.exceptions import RegexMatchError
-from pathlib import Path
+from PIL import Image, ImageTk
+from tkinter import ttk 
+from pytube.exceptions import RegexMatchError, PytubeError
 
 # Para exibir o caminho DA PASTA atual
 # caminho_diretorio = Path()             
@@ -29,76 +28,100 @@ from pathlib import Path
 # print(caminho_arquivo) 
 
 #= = = = = = = = = = = = = = = = = = = = = CONFIG JANELA TKINTER = = = = = = = = = = = = = = = = = = = = =
-janelaYT = Tk()                 #INICAR A JANELA 'TK INTER'
-janelaYT.geometry('630x230')    #Largura x Altura
-janelaYT.resizable(width=None, height=None) #Largura e Altura PODEM ser redimensionadas.
+janelaYT = Tk()                 # INICAR A JANELA 'TK INTER'
+janelaYT.geometry('494x325')    # Largura x Altura
+janelaYT.resizable(width=None, height=None) # Janela dimensionável = None | Janela NÃO dimensionável = False
 janelaYT.title('YT VidSound')
 janelaYT.iconbitmap('images/YT-VidSound.ico')
 janelaYT['bg'] = '#D3D3D3'
 
 #= = = = = = = = = = = = = = = = = = = = = = = = = FUNÇÕES = = = = = = = = = = = = = = = = = = = = = = = =
-def video(link):
+def video():
+    link = link_entry.get()
     if link:
         try: 
-            mp4 = YouTube(link)       
-            titulo = Label(janelaYT, bg = 'red', text = (f'Baixando: {mp4.author} \r\n {mp4.title}'), font = 'arial 12 bold')
-            titulo.grid(row = 1, column = 1)             
-            stream = mp4.streams.get_highest_resolution()       #Baixar a melhor resolução do vídeo         
-            pasta = filedialog.askdirectory()
-            stream.download(pasta)                              #Baixar na pasta Download           
-                     
-            baixando = Label(janelaYT, bg = 'blue', text = 'Download Concluído!', font = 'arial 15 bold')
-            baixando.grid(row = 2, column = 1, ipadx = 15, ipady = 5)
-            janelaYT.after(10000, lambda: baixando.config(text='STATUS DOWNLOAD'))
+            mp4 = YouTube(link)  
+                 
+            try:
+                nome.config(text=f'{mp4.author} - {mp4.title}')
+            except KeyError:
+                nome.config(text='Erro ao acessar o título do vídeo')
+                
+            stream = mp4.streams.get_highest_resolution() # Baixar a melhor resolução do vídeo         
+            
+            pasta = filedialog.askdirectory() # Escolher a pasta para salvar o vídeo
+            if not pasta:
+                return
+                
+            # Atualizar a barra de progresso
+            progress_bar['value'] = 0
+            janelaYT.update_idletasks()
+            stream.download(pasta)
+            progress_bar['value'] = 100
+            janelaYT.update_idletasks()
+             
+            nome.config(text=f'{mp4.author} - {mp4.title} - Download Concluído!')
+            janelaYT.after(10000, lambda: nome.config(text='STATUS'))
 
             frequencia = 2200  # Frequência em hertz
             duracao = 1000   # Duração em milissegundos (1 segundo)
             winsound.Beep(frequencia, duracao)
              
         except RegexMatchError:
-            baixando = Label(janelaYT, bg = 'blue', text = '  LINK INVÁLIDO!  ', font = 'arial 15 bold')
-            baixando.grid(row = 2, column = 1, ipadx = 15, ipady = 5)
-                    
-    else: 
-        baixando = Label(janelaYT, bg = 'blue', text = '  LINK INVÁLIDO!  ', font = 'arial 15 bold')
-        baixando.grid(row = 2, column = 1, ipadx = 15, ipady = 5)
+            nome.config(text='LINK INVÁLIDO!')
+        except PytubeError as e:
+            nome.config(text=f'Erro: {str(e)}')
+        except Exception as e:
+            nome.config(text=f'Erro inesperado: {str(e)}')
+    else:
+        nome.config(text='LINK INVÁLIDO!')
 
-def musica(link):
+def musica():
+    link = link_entry.get()
     if link:
         try:  
             mp3 = YouTube(link)
-            audio = mp3.streams.filter(only_audio=True).first() #Baixar áudio em formato MP3
-            titulo = Label(janelaYT, bg = 'red', text = (f'Baixando: {mp3.author} \r\n {mp3.title}'), font = 'arial 12 bold')
-            titulo.grid(row = 1, column = 1)             
+            
+            try:
+                nome.config(text=f'{mp3.author} - {mp3.title}')
+            except KeyError:
+                nome.config(text='Erro ao acessar o título do vídeo')
+                
+            audio = mp3.streams.filter(only_audio=True).first() # Baixar áudio em formato MP3
+            
             pasta = filedialog.askdirectory()
+            if not pasta:
+                return
+            
             destino = audio.download(pasta)                     #Baixar na pasta Download           
-            destino = "C:/Users/CaiqueSF/Downloads"
+            base, ext = os.path.splitext(destino)
 
-            ArquivoSaida = audio.download(output_path=destino)
-            base, ext = os.path.splitext(ArquivoSaida)
-
-            ArquivoNovo = base + '.mp3'
-            if os.path.exists(ArquivoNovo):
-                os.remove(ArquivoNovo)
-                os.rename(ArquivoSaida, ArquivoNovo)
-            else:
-                os.rename(ArquivoSaida, ArquivoNovo)
-
-            baixando = Label(janelaYT, bg = 'blue', text = 'Download Concluído!', font = 'arial 15 bold')
-            baixando.grid(row = 2, column = 1, ipadx = 15, ipady = 5)  
-            janelaYT.after(10000, lambda: baixando.config(text='STATUS DOWNLOAD'))           
+            novo_arquivo = base + '.mp3'
+            if os.path.exists(novo_arquivo):
+                os.remove(novo_arquivo)
+            os.rename(destino, novo_arquivo)
+                
+            # Atualizar a barra de progresso
+            progress_bar['value'] = 0
+            janelaYT.update_idletasks()
+            progress_bar['value'] = 100
+            janelaYT.update_idletasks()
+            
+            nome.config(text=f'{mp3.author} - {mp3.title} - Download Concluído!')
+            janelaYT.after(10000, lambda: nome.config(text='STATUS'))          
             
             frequencia = 2200  # Frequência em hertz
             duracao = 1000   # Duração em milissegundos (1 segundo)
             winsound.Beep(frequencia, duracao)
 
         except RegexMatchError:
-            baixando = Label(janelaYT, bg = 'blue', text = '  LINK INVÁLIDO!  ', font = 'arial 15 bold')
-            baixando.grid(row = 2, column = 1, ipadx = 15, ipady = 5)
-                  
-    else: 
-        baixando = Label(janelaYT, bg = 'blue', text = '  LINK INVÁLIDO!  ', font = 'arial 15 bold')
-        baixando.grid(row = 2, column = 1, ipadx = 15, ipady = 5)
+            nome.config(text='LINK INVÁLIDO!')
+        except PytubeError as e:
+            nome.config(text=f'Erro: {str(e)}')
+        except Exception as e:
+            nome.config(text=f'Erro inesperado: {str(e)}')
+    else:
+        nome.config(text='LINK INVÁLIDO!')
     
 #OPÇÃO POP-UP NÃO CHAMADA NA FUNÇÃO
 #FUNÇÃO: Aviso de Donwload Concluído
@@ -127,37 +150,47 @@ frame_imagem.pack(pady=10)
 frame_topo = Frame(janelaYT, bg='#D3D3D3')
 frame_topo.pack(pady=10)
 
-frame_meio = Frame(janelaYT, bg='#D3D3D3')
-frame_meio.pack(pady=10)
+frame_1 = Frame(janelaYT, bg='#D3D3D3')
+frame_1.pack(pady=10, fill='x')
 
 frame_baixo = Frame(janelaYT, bg='#D3D3D3')
-frame_baixo.pack(pady=10)
+frame_baixo.pack(pady=10, fill='x')
 
-# Linha 0 - Entrada do Link e Imagem ###################################################
-photoYTP = PhotoImage(file="images/YT-VidSound.png").subsample(15, 15)
-Label(frame_imagem, image=photoYTP).pack()
+# Frame Imagem #########################################################################
+image = Image.open("images/YT-VidSound2.png")
+image = image.resize((250, 100), Image.LANCZOS)
 
-# Linha 1 - Entrada do Link e Imagem ###################################################
-Label(frame_topo, bg='blue', text='Inserir Link', font='arial 14 bold').pack(side='left', padx=5)
+photoYTP = ImageTk.PhotoImage(image)
+Label(frame_imagem, image=photoYTP).pack(pady=5)
 
-link = Entry(frame_topo, font='arial 16 bold', width=30)
-link.pack(side='left', padx=5)
+# Frame Topo - Entrada do Link e Imagem ################################################
+Label(frame_topo, text='Inserir Link', font='arial 14 bold', bg='#D3D3D3').pack(side='left', padx=5)
 
-# Linha 2 - Botões e Status ############################################################
+link_entry = Entry(frame_topo, font='arial 16 bold', width=27)
+link_entry.pack(side='left', padx=5)
+
+# Frame 1 - Botões #####################################################################
 photoDW = PhotoImage(file="images/download2.png").subsample(15, 15)
 
-bt1 = Button(frame_meio, bg='blue', text='MÚSICA MP3', font='arial 12 bold', command=lambda: musica(link.get()), image=photoDW, compound='bottom')
-bt1.pack(side='left', padx=10)
+bt1 = Button(frame_1, text='MÚSICA MP3', font='arial 12 bold', command=musica, image=photoDW, compound='bottom')
+bt1.pack(side='left', padx=20, pady=10)
 
-status = Label(frame_meio, bg='red', text='STATUS DOWNLOAD', font='arial 12 bold')
-status.pack(side='left', padx=10)
+bt2 = Button(frame_1, text='VÍDEO MP4', font='arial 12 bold', command=video, image=photoDW, compound='bottom')
+bt2.pack(side='left', padx=20, pady=10)
 
-bt2 = Button(frame_meio, bg='blue', text='VÍDEO MP4', font='arial 12 bold', command=lambda: video(link.get()), image=photoDW, compound='bottom')
-bt2.pack(side='left', padx=10)
+progress_bar = ttk.Progressbar(frame_1, orient='horizontal', length=200, mode='determinate')
+progress_bar.pack(side='left', pady=10, before=bt2)
 
-# Linha 3 - Status de Download #########################################################    
-baixando = Label(frame_baixo, bg='blue', text='STATUS DOWNLOAD', font='arial 15 bold')
-baixando.pack(pady=5)
+
+# Frame Baixo - Nome do Vídeo ##########################################################
+def copiar_texto(event):
+    janelaYT.clipboard_clear()
+    janelaYT.clipboard_append(nome.cget("text"))
+
+Label(frame_baixo, text='Autor: ', font='arial 15 bold', bg='#D3D3D3').pack(side='left', padx=20)
+nome = Label(frame_baixo, text='', font='arial 15 bold', bg='#D3D3D3')
+nome.pack(side='left', padx=5, pady=5, anchor='w')
+nome.bind("<Double-Button-1>", copiar_texto)
 
 janelaYT.mainloop() #EXIBIR A JANELA ATÉ FECHAR
 
