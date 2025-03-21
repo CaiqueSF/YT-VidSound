@@ -14,10 +14,11 @@ Pytube version: 15.0.0
 import os
 import winsound
 from tkinter import filedialog, Tk, Label, Entry, Button, PhotoImage, Frame, Toplevel
-from pytube import YouTube
+from pytubefix import YouTube  # Substitua pytube por pytubefix
 from PIL import Image, ImageTk
 from tkinter import ttk 
-from pytube.exceptions import RegexMatchError, PytubeError
+from pytubefix.exceptions import RegexMatchError, VideoUnavailable  # Substitua pytube por pytubefix
+from urllib.error import HTTPError
 
 # Para exibir o caminho DA PASTA atual
 # caminho_diretorio = Path()             
@@ -29,14 +30,17 @@ from pytube.exceptions import RegexMatchError, PytubeError
 
 #= = = = = = = = = = = = = = = = = = = = = CONFIG JANELA TKINTER = = = = = = = = = = = = = = = = = = = = =
 janelaYT = Tk()                 # INICAR A JANELA 'TK INTER'
-janelaYT.geometry('494x325')    # Largura x Altura
-janelaYT.resizable(width=None, height=None) # Janela dimensionável = None | Janela NÃO dimensionável = False
+janelaYT.geometry('494x335')    # Largura x Altura
+janelaYT.resizable(width=True, height=False)  # Permite redimensionamento horizontal, bloqueia vertical
 janelaYT.title('YT VidSound')
 janelaYT.iconbitmap('images/YT-VidSound.ico')
 janelaYT['bg'] = '#D3D3D3'
 
 #= = = = = = = = = = = = = = = = = = = = = = = = = FUNÇÕES = = = = = = = = = = = = = = = = = = = = = = = =
 def video():
+    progress_bar['value'] = 0
+    janelaYT.update_idletasks()
+    
     link = link_entry.get()
     if link:
         try: 
@@ -60,23 +64,26 @@ def video():
             progress_bar['value'] = 100
             janelaYT.update_idletasks()
              
-            nome.config(text=f'{mp4.author} - {mp4.title} - Download Concluído!')
-            janelaYT.after(10000, lambda: nome.config(text='STATUS'))
-
+            # Som de conclusão
             frequencia = 2200  # Frequência em hertz
-            duracao = 1000   # Duração em milissegundos (1 segundo)
+            duracao = 500   # Duração em milissegundos (0.5 segundo)
             winsound.Beep(frequencia, duracao)
              
+        except HTTPError as e:
+            nome.config(text=f'Erro de requisição HTTP: {str(e)}')
         except RegexMatchError:
             nome.config(text='LINK INVÁLIDO!')
-        except PytubeError as e:
-            nome.config(text=f'Erro: {str(e)}')
+        except VideoUnavailable:
+            nome.config(text='Vídeo indisponível ou restrito.')
         except Exception as e:
             nome.config(text=f'Erro inesperado: {str(e)}')
     else:
         nome.config(text='LINK INVÁLIDO!')
 
 def musica():
+    progress_bar['value'] = 0
+    janelaYT.update_idletasks()
+    
     link = link_entry.get()
     if link:
         try:  
@@ -93,7 +100,7 @@ def musica():
             if not pasta:
                 return
             
-            destino = audio.download(pasta)                     #Baixar na pasta Download           
+            destino = str(audio.download(pasta))                     #Baixar na pasta Download           
             base, ext = os.path.splitext(destino)
 
             novo_arquivo = base + '.mp3'
@@ -107,17 +114,17 @@ def musica():
             progress_bar['value'] = 100
             janelaYT.update_idletasks()
             
-            nome.config(text=f'{mp3.author} - {mp3.title} - Download Concluído!')
-            janelaYT.after(10000, lambda: nome.config(text='STATUS'))          
-            
+            # Som de conclusão
             frequencia = 2200  # Frequência em hertz
-            duracao = 1000   # Duração em milissegundos (1 segundo)
+            duracao = 500   # Duração em milissegundos (0.5 segundo)
             winsound.Beep(frequencia, duracao)
 
+        except HTTPError as e:
+            nome.config(text=f'Erro de requisição HTTP: {str(e)}')
         except RegexMatchError:
             nome.config(text='LINK INVÁLIDO!')
-        except PytubeError as e:
-            nome.config(text=f'Erro: {str(e)}')
+        except VideoUnavailable:
+            nome.config(text='Vídeo indisponível ou restrito.')
         except Exception as e:
             nome.config(text=f'Erro inesperado: {str(e)}')
     else:
@@ -151,14 +158,14 @@ frame_topo = Frame(janelaYT, bg='#D3D3D3')
 frame_topo.pack(pady=10)
 
 frame_1 = Frame(janelaYT, bg='#D3D3D3')
-frame_1.pack(pady=10, fill='x')
+frame_1.pack(pady=10)  # Expande horizontalmente
 
 frame_baixo = Frame(janelaYT, bg='#D3D3D3')
-frame_baixo.pack(pady=10, fill='x')
+frame_baixo.pack(pady=10, fill='x')  # Expande horizontalmente
 
 # Frame Imagem #########################################################################
 image = Image.open("images/YT-VidSound2.png")
-image = image.resize((250, 100), Image.LANCZOS)
+image = image.resize((250, 100), Image.Resampling.LANCZOS)
 
 photoYTP = ImageTk.PhotoImage(image)
 Label(frame_imagem, image=photoYTP).pack(pady=5)
@@ -181,13 +188,12 @@ bt2.pack(side='left', padx=20, pady=10)
 progress_bar = ttk.Progressbar(frame_1, orient='horizontal', length=200, mode='determinate')
 progress_bar.pack(side='left', pady=10, before=bt2)
 
-
 # Frame Baixo - Nome do Vídeo ##########################################################
 def copiar_texto(event):
     janelaYT.clipboard_clear()
     janelaYT.clipboard_append(nome.cget("text"))
 
-Label(frame_baixo, text='Autor: ', font='arial 15 bold', bg='#D3D3D3').pack(side='left', padx=20)
+Label(frame_baixo, text='Título: ', font='arial 15 bold', bg='#D3D3D3').pack(side='left', padx=20)
 nome = Label(frame_baixo, text='', font='arial 15 bold', bg='#D3D3D3')
 nome.pack(side='left', padx=5, pady=5, anchor='w')
 nome.bind("<Double-Button-1>", copiar_texto)
@@ -198,4 +204,4 @@ janelaYT.mainloop() #EXIBIR A JANELA ATÉ FECHAR
 #RIGHT-> a imagem estará no lado direito do botão
 #TOP-> a imagem estará no topo do botão
 #BOTTOM-> a imagem estará na parte inferior do botão
-#pyinstaller --onefile --noconsole .\main.py             
+#pyinstaller --onefile --noconsole .\main.py
