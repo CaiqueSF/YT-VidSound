@@ -1,2 +1,7 @@
-# template-repo
-Template para criar repositórios
+<!-- pyinstaller --onefile --noconsole .\main.py -->
+
+-   Criar Executável
+
+-   Criar README.md
+
+-   Atualizar requirements.txt
