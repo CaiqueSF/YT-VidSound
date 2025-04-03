@@ -66,7 +66,7 @@ A estrutura do projeto está organizada da seguinte forma:
     python src/main.py
     ```
 
-5. Caso prefira, baixe o arquivo executável: [Baixar o executável](ytvidsound.exe)
+5. Caso prefira, faça o download da versão executável: [Download](https://github.com/CaiqueSF/YT-VidSound/releases/download/v1.0.0/ytvidsound.exe)
 
 ## ➡ Contribuindo
 
