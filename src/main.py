@@ -4,18 +4,19 @@ from tkinter import ttk
 
 from services.download_video import Video
 from services.download_musica import Musica
-
+from utils.resource_path import resource_path
 
 #= = = = = = = = = = = = = = = = = = = = = CONFIG JANELA TKINTER = = = = = = = = = = = = = = = = = = = = =
 janelaYT = Tk()                 # INICAR A JANELA 'TK INTER'
 janelaYT.geometry('494x335')    # Largura x Altura
+janelaYT.minsize(494, 335)
 janelaYT.resizable(width=True, height=False)  # Permite redimensionamento horizontal, bloqueia vertical
 janelaYT.title('YT VidSound')
-janelaYT.iconbitmap('images/YT-VidSound.ico')
+janelaYT.iconbitmap(resource_path("src/images/YT-VidSound.ico"))
 janelaYT['bg'] = '#D3D3D3'
 
 
-# Frames para organizar os widgets ##################################################### 
+# Frames para organizar os widgets #####################################################
 frame_imagem = Frame(janelaYT, bg='#D3D3D3', bd=0, highlightthickness=0)
 frame_imagem.pack(pady=10)
 
@@ -30,7 +31,7 @@ frame_baixo.pack(pady=10, fill='x')  # Expande horizontalmente
 
 
 # Frame Imagem #########################################################################
-image = Image.open("images/YT-VidSound.png")
+image = Image.open(resource_path("src/images/YT-VidSound.png"))
 image = image.resize((250, 100), Image.Resampling.LANCZOS)
 
 photoYTP = ImageTk.PhotoImage(image)
@@ -44,7 +45,7 @@ link_entry.pack(side='left', padx=5)
 
 
 # Frame 1 - Botões #####################################################################
-photoDW = PhotoImage(file="images/download.png").subsample(15, 15)
+photoDW = PhotoImage(file=resource_path("src/images/download.png")).subsample(15, 15)
 
 bt1 = Button(frame_1, text='MÚSICA MP3', font='arial 12 bold', image=photoDW, compound='bottom')
 bt1.pack(side='left', padx=20, pady=10)
