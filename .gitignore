@@ -45,3 +45,4 @@ packages/  # Pacotes NuGet (C#)
 PyInstaller.md
 build/
 dist/
+ytvidsound.zip
