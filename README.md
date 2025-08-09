@@ -1,6 +1,6 @@
 # YT VidSound
 
-## ➡ Tecnologias Utilizada
+## ➡ Tecnologias Utilizadas
 
 Python: Linguagem principal utilizada para o desenvolvimento do projeto.
 
