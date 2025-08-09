@@ -100,3 +100,5 @@ A estrutura do projeto está organizada da seguinte forma:
 🔹 **E-mail**: caiquedesousaferreira@gmail.com
 
 🔹 **LinkedIn**: [Caíque de S. Ferreira](https://www.linkedin.com/in/ca%C3%ADque-de-s-ferreira-48105b18b/)
+
+🔹 **GitHub**: [CaiqueSF](https://github.com/CaiqueSF)
