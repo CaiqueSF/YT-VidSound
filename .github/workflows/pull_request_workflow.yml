@@ -5,7 +5,7 @@ on:
         types: [closed]
 
 jobs:
-    deploy-main:
+    pull-request-workflow:
         runs-on: ubuntu-latest
 
         steps:
