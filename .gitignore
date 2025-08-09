@@ -41,4 +41,7 @@ packages/  # Pacotes NuGet (C#)
 *.suo
 *.sln.docstates
 
-exe/
+# Arquivos de configuração do PyInstaller
+PyInstaller.md
+build/
+dist/
